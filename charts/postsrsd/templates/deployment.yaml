@@ -1,0 +1,115 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "postsrsd.fullname" . }}
+  labels:
+    {{- include "postsrsd.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "postsrsd.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "postsrsd.labels" . | nindent 8 }}
+        {{- with .Values.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "postsrsd.serviceAccountName" . }}
+      {{- with .Values.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: {{ .Chart.Name }}
+          {{- with .Values.securityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+            - name: SRS_DOMAIN
+              value: {{ .Values.postsrsd.srs_domain }}
+            - name: SRS_EXCLUDE_DOMAINS
+              value: '{{ .Values.postsrsd.srs_exclude_domains }}'
+            - name: SRS_SEPARATOR
+              value: '{{ .Values.postsrsd.srs_separator }}'
+            - name: SRS_SOCKET_PORT
+              value: '{{ .Values.postsrsd.srs_socket_port }}'
+            - name: SRS_MILTER_PORT
+              value: '{{ .Values.postsrsd.srs_milter_port }}'
+            - name: SRS_HASHLENGTH
+              value: '{{ .Values.postsrsd.srs_hashlength }}'
+            - name: SRS_HASHMIN
+              value: '{{ .Values.postsrsd.srs_hashmin }}'
+            - name: SRS_RUN_AS
+              value: {{ .Values.postsrsd.srs_run_as }}
+            - name: SRS_CHROOT
+              value: {{ .Values.postsrsd.srs_chroot }}
+            - name: SRS_LISTEN_ADDRESS
+              value: {{ .Values.postsrsd.srs_listen_address }}
+            - name: SRS_MILTER_LISTEN_ADDRESS
+              value: {{ .Values.postsrsd.srs_milter_listen_address }}
+            - name: SRS_OG_ENVELOPE
+              value: {{ .Values.postsrsd.srs_og_envelope }}
+            - name: SRS_REDIS_HOST
+              value: {{ .Values.postsrsd.srs_redis_host }}
+            - name: SRS_DEBUG
+              value: '{{ .Values.postsrsd.srs_debug }}'
+            - name: SRS_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ tpl .Values.postsrsd.hashkey.existingSecretName . }}
+                  key: {{ tpl .Values.postsrsd.hashkey.existingSecretKey . }}
+          ports:
+            - name: postsrsd-socket
+              containerPort: {{ .Values.service.socket.port }}
+              protocol: TCP
+            - name: postsrsd-milter
+              containerPort: {{ .Values.service.milter.port }}
+              protocol: TCP
+          {{- with .Values.livenessProbe }}
+          livenessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.readinessProbe }}
+          readinessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.volumeMounts }}
+          volumeMounts:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+      {{- with .Values.volumes }}
+      volumes:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

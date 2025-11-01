@@ -1,0 +1,79 @@
+replicaCount: 1
+
+image:
+  repository: ghcr.io/denefoster/k8s-postsrsd
+  pullPolicy: IfNotPresent
+  tag: ""
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  create: true
+  automount: true
+  annotations: {}
+  name: ""
+
+podAnnotations: {}
+
+podLabels: {}
+
+podSecurityContext: {}
+
+securityContext: {}
+
+service:
+  type: ClusterIP
+  socket:
+    port: 10003
+  milter:
+    port: 9997
+
+resources: {}
+
+livenessProbe: {}
+
+volumes: []
+
+volumeMounts: []
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 100
+  targetCPUUtilizationPercentage: 80
+
+secretHashkey:
+  create: true
+  name: postsrsd
+  data:
+    hashkey: setthistoaverylongstring
+
+postsrsd:
+  srs_domain: localhost.localnet
+  srs_exclude_domains: ""
+  srs_separator: "="
+  srs_socket_port: "10003"
+  srs_milter_port: "9997"
+  srs_hashlength: "4"
+  srs_hashmin: "4"
+  srs_run_as: postsrsd
+  srs_chroot: /var/lib/postsrsdr
+  srs_listen_address: "0.0.0.0"
+  srs_milter_listen_address: "0.0.0.0"
+  srs_og_envelope: embedded
+  srs_redis_host: postsrsd-valkey
+  srs_debug: "no"
+  hashkey:
+    existingSecretName: postsrsd
+    existingSecretKey: hashkey
+
+valkey:
+  enabled: false
