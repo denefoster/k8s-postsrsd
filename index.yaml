@@ -1,0 +1,19 @@
+apiVersion: v1
+entries:
+  postsrsd:
+  - apiVersion: v2
+    appVersion: 1.0.2
+    created: "2025-11-01T13:19:44.776161464Z"
+    dependencies:
+    - condition: valkey.enabled
+      name: valkey
+      repository: https://valkey.io/valkey-helm/
+      version: 0.7.7
+    description: A Helm chart for Kubernetes
+    digest: f6fb4779167a40d657ef3c0e51ecd56d784b76fe94168a5aa770f099df5395c6
+    name: postsrsd
+    type: application
+    urls:
+    - https://github.com/denefoster/k8s-postsrsd/releases/download/postsrsd-1.0.2/postsrsd-1.0.2.tgz
+    version: 1.0.2
+generated: "2025-11-01T13:19:44.776170751Z"
